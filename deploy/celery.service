@@ -1,0 +1,15 @@
+[Unit]
+Description=Celery Service
+After=network.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+WorkingDirectory=/root/web3-wallet/project
+ExecStart=/root/web3-wallet/env/bin/celery -A project worker --loglevel=info --beat
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
