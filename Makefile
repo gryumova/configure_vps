@@ -4,7 +4,8 @@
 GIT_REPO = https://github.com/gryumova/web3-wallet
 VENV_NAME = env
 PROJECT_DIR = /root/web3-wallet
-NGINX_CONFIG = db6a934f5372.vps.myjino.ru.conf
+HOST = cc2219ac2097.vps.myjino.ru
+NGINX_CONFIG = cc2219ac2097.vps.myjino.ru.conf
 CELERY_SERVICE = celery.service
 DAPHNE_SERVICE= daphne.conf
 POSTGRES_DB = wallet
@@ -16,14 +17,17 @@ configure_server:
 	sudo apt update && sudo apt upgrade
 	sudo apt-get update --fix-missing 
 	sudo apt install -f python3 python3-venv python3-pip nginx redis-server 
-	sudo apt install nodejs
+	sudo apt remove npm nodejs
+	sudo apt-get install -f
+	curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+	sudo apt-get install -y nodejs
 	sudo apt install npm
 
 clone_repo:
 	git clone $(GIT_REPO) $(PROJECT_DIR) 
 	cd $(PROJECT_DIR) 
 	python3 -m venv $(PROJECT_DIR)/$(VENV_NAME) 
-	bash -c "source $(PROJECT_DIR)/$(VENV_NAME)/bin/activate" 
+	source $(PROJECT_DIR)/$(VENV_NAME)/bin/activate 
 	pip install -r $(PROJECT_DIR)/project/requirements.txt
 	pip install django
 	pip install daphne
@@ -74,7 +78,7 @@ react:
 	cd $(PROJECT_DIR)/client/
 	npm install
 	npm run build
-	cp -r $(PROJECT_DIR)/client/build /var/www/3f9215732d0c.vps.myjino.ru
+	cp -r $(PROJECT_DIR)/client/build /var/www/$(HOST)
 	sudo systemctl restart nginx
 
 
@@ -84,7 +88,7 @@ deploy: configure_server clone_repo postgresql migrate nginx-conf daphne-conf re
 update:
 	sudo systemctl daemon-reload 
 	sudo systemctl restart nginx
-	sudo systemctl restart daphne
+	sudo service supervisor restart
 	sudo systemctl restart selery
 
 # Collect static files
