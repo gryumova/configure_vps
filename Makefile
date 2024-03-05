@@ -89,7 +89,7 @@ update:
 
 # Collect static files
 collectstatic: 
-    python manage.py collectstatic --noinput
+	python manage.py collectstatic --noinput
 
 # Run database migrations
 migrate: 
