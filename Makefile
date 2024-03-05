@@ -2,7 +2,7 @@
 
 # Variables
 GIT_REPO = https://github.com/gryumova/web3-wallet
-VENV_DIR = /root/web3-wallet/env
+VENV_NAME = env
 PROJECT_DIR = /root/web3-wallet
 NGINX_CONFIG = db6a934f5372.vps.myjino.ru.conf
 CELERY_SERVICE = celery.service
@@ -20,11 +20,11 @@ configure_server:
 	sudo apt install npm
 
 clone_repo:
-	git clone $(GIT_REPO) /root/web3-wallet 
+	git clone $(GIT_REPO) $(PROJECT_DIR) 
 	cd $(PROJECT_DIR) 
-	python3 -m venv $(VENV_DIR) 
-	bash -c "source /root/web3-wallet/env/bin/activate" 
-	pip install -r /root/web3-wallet/project/requirements.txt
+	python3 -m venv $(PROJECT_DIR)/$(VENV_NAME) 
+	bash -c "source $(PROJECT_DIR)/$(VENV_NAME)/bin/activate" 
+	pip install -r $(PROJECT_DIR)/project/requirements.txt
 	pip install django
 	pip install daphne
 	pip install django-cors-headers
