@@ -16,6 +16,8 @@ configure_server:
 	sudo apt update && sudo apt upgrade
 	sudo apt-get update --fix-missing 
 	sudo apt install -f python3 python3-venv python3-pip nginx redis-server 
+	sudo apt install nodejs
+	sudo apt install npm
 
 clone_repo:
 	git clone $(GIT_REPO) /root/web3-wallet 
@@ -33,9 +35,9 @@ clone_repo:
 	pip install celery[redis]
 
 postgresql: 
-	# sudo apt install postgresql postgresql-contrib
-	# sudo systemctl start postgresql.service
-	# sudo -u postgres psql -c "CREATE DATABASE $(POSTGRES_DB);"
+	sudo apt install postgresql postgresql-contrib
+	sudo systemctl start postgresql.service
+	sudo -u postgres psql -c "CREATE DATABASE $(POSTGRES_DB);"
 	sudo -u postgres psql -c "CREATE USER $(POSTGRES_USER) WITH PASSWORD '$(POSTGRES_PASSWORD)';"
 	sudo -u postgres psql -c "ALTER ROLE $(POSTGRES_USER) SET client_encoding TO 'utf8';"
 	sudo -u postgres psql -c "ALTER ROLE $(POSTGRES_USER) SET default_transaction_isolation TO 'read committed';" 
@@ -68,8 +70,16 @@ daphne-conf:
 	sudo service supervisor restart
 	sudo supervisorctl status 
 
+react:
+	cd $(PROJECT_DIR)/client/
+	npm install
+	npm run build
+	cp -r $(PROJECT_DIR)/client/build /var/www/3f9215732d0c.vps.myjino.ru
+	sudo systemctl restart nginx
+
+
 # Deploy: Install dependencies, collect static files, run migrations, restart Gunicorn and Nginx
-deploy: configure_server postgresql migrate nginx-conf daphne-conf redis celery-conf
+deploy: configure_server clone_repo postgresql migrate nginx-conf daphne-conf redis celery-conf
 
 update:
 	sudo systemctl daemon-reload 
