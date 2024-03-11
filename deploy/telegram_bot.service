@@ -1,0 +1,14 @@
+[Unit]
+Description=Telegram Bot
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/web3-wallet/tg_bot
+ExecStart=/root/web3-wallet/env/bin/python3 bot.py
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

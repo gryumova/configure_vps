@@ -28,15 +28,15 @@ clone_repo:
 	cd $(PROJECT_DIR) 
 	python3 -m venv $(PROJECT_DIR)/$(VENV_NAME) 
 	source $(PROJECT_DIR)/$(VENV_NAME)/bin/activate 
-	pip install -r $(PROJECT_DIR)/project/requirements.txt
-	pip install django
-	pip install daphne
-	pip install django-cors-headers
-	pip install djangorestframework
-	pip install psycopg2-binary web3
-	pip install channels
-	pip install django_extensions django_celery_beat
-	pip install celery[redis]
+	$(PROJECT_DIR)/env/bin/pip install -r $(PROJECT_DIR)/project/requirements.txt
+	$(PROJECT_DIR)/env/bin/pip install django
+	$(PROJECT_DIR)/env/bin/pip install daphne
+	$(PROJECT_DIR)/env/bin/pip install django-cors-headers
+	$(PROJECT_DIR)/env/bin/pip install djangorestframework
+	$(PROJECT_DIR)/env/bin/pip install psycopg2-binary web3
+	$(PROJECT_DIR)/env/bin/pip install channels
+	$(PROJECT_DIR)/env/bin/pip install django_extensions django_celery_beat
+	$(PROJECT_DIR)/env/bin/pip install celery[redis]
 
 postgresql: 
 	sudo apt install postgresql postgresql-contrib
@@ -59,8 +59,8 @@ nginx-conf:
 celery-conf:
 	sudo cp deploy/$(CELERY_SERVICE) /etc/systemd/system/celery.service
 	sudo systemctl daemon-reload 
-	sudo systemctl start $(CELERY_SERVICE) 
-	sudo systemctl enable $(CELERY_SERVICE) 
+	sudo systemctl start $(CELERY_SERVICE) &
+	sudo systemctl enable $(CELERY_SERVICE) &
 
 redis:
 	sudo apt-get update
@@ -89,7 +89,7 @@ update:
 	sudo systemctl daemon-reload 
 	sudo systemctl restart nginx
 	sudo service supervisor restart
-	sudo systemctl restart selery
+	sudo systemctl restart selery &
 
 # Collect static files
 collectstatic: 
@@ -97,8 +97,15 @@ collectstatic:
 
 # Run database migrations
 migrate: 
-	python3 $(PROJECT_DIR)/project/manage.py makemigrations
-	python3 $(PROJECT_DIR)/project/manage.py migrate
+	$(PROJECT_DIR)/env/bin/python3 $(PROJECT_DIR)/project/manage.py makemigrations
+	$(PROJECT_DIR)/env/bin/python3 $(PROJECT_DIR)/project/manage.py migrate
+
+
+bot:
+	sudo systemctl daemon-reload
+	sudo systemctl start telegram_bot
+	sudo systemctl enable telegram_bot
+	sudo systemctl restart celery
 
 # PHONY targets
 .PHONY: deploy update collectstatic migrate 
